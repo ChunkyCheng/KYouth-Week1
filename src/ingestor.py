@@ -1,6 +1,7 @@
 from pathlib import Path
 from email import message_from_binary_file
 import quopri
+import logging
 
 def ingest_all_mhtml(input_dir, output_dir):
     input_dir = Path(input_dir)
@@ -8,13 +9,13 @@ def ingest_all_mhtml(input_dir, output_dir):
     output_dir.mkdir(exist_ok=True, parents=True)
 
     if not input_dir.is_dir():
-        print(input_dir, "/ path not found", sep="")
+        logging.error(f"Failed to ingest: {input_dir}/ | Reason: {input_dir}/ not found")
         return
 
     total = 0
     success = 0
     fail = 0
-    print("🥉 Bronze: ", output_dir, "/")
+    print("🥉 Bronze:...")
     for f in input_dir.iterdir():
         if f.is_file() and f.suffix == ".mhtml":
             total += 1
@@ -31,7 +32,7 @@ def ingest_mhtml(infile, output_dir):
     for part in mhtml_data.walk():
         if part.get_content_type() == "text/html":
             outfile.write_text(quopri.decodestring(part.get_payload(decode=False)).decode())
-            print("✅ Extracted:", infile.name)
+            logging.info(f"✅ Extracted: {infile.name}")
             return True
-    print("⚠️ No HTML content found in:", infile.name)
+    logging.warning(f"⚠️ No HTML content found in: {infile.name}")
     return False

@@ -3,6 +3,12 @@ from src.ingestor import ingest_all_mhtml
 from src.processor import process_all_html
 from src.loader import load_all_jsons
 from src.profiler import run_data_profile
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s"
+)
 
 def ingest():
     ingest_all_mhtml("data/0_source", "data/1_bronze")
@@ -35,7 +41,7 @@ commands = {
 
 def main():
     if len(sys.argv) == 2:
-        commands.get(sys.argv[1], lambda: print("Unknown command"))()
+        commands.get(sys.argv[1], lambda: print(f"Unknown command: {sys.argv[1]}"))()
     else:
         print("Usage: python", sys.argv[0], "[ingest|process|load|profile|all]")
 

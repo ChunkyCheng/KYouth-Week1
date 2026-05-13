@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 from pydantic import BaseModel
 from pydantic import Field
 from pydantic import ValidationError
+import logging
 
 class JobListing(BaseModel):
     source_id: str = Field(min_length=1)
@@ -16,13 +17,13 @@ def process_all_html(input_dir, output_dir):
     output_dir.mkdir(exist_ok=True, parents=True)
 
     if not input_dir.is_dir():
-        print(input_dir, "/ path not found", sep="")
+        logging.error(f"Failed to process: {input_dir}/ | Reason: {input_dir}/ not found")
         return
     
     total = 0
     success = 0
     fail = 0
-    print("🥈 Silver: ", output_dir, "/", sep="")
+    print("🥈 Silver:...")
     for f in input_dir.iterdir():
         if f.is_file() and f.suffix == ".html":
             total += 1
@@ -52,12 +53,12 @@ def process_html(infile, output_dir):
             description=description
         )
         outfile.write_text(job.model_dump_json(indent=4))
-        print("✅ Processed:", infile.name)
+        logging.info(f"✅ Processed: {infile.name}")
         return True
     except ValidationError as e:
         for error in e.errors():
             loc = error['loc'][0].strip("('')")
-            print("⚠️ Missing", loc, "in:", infile.name)
+            logging.warning(f"⚠️ Missing {loc} in: {infile.name}")
         return False
 
 def get_value_from_soup(soup, attribute=None, **kwargs):

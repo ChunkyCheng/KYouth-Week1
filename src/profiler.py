@@ -1,11 +1,12 @@
 from pathlib import Path
 import sqlite3
+import logging
 
 def run_data_profile(db_path):
     db_path = Path(db_path)
 
     if not db_path.is_file():
-        print("❌ Database not found at", db_path)
+        logging.error(f"Failed to profile: {db_path} | Reason: database not found at {db_path}")
         return
 
     try:
@@ -52,7 +53,7 @@ def run_data_profile(db_path):
             f"  ↳ source_id: {longest_desc_id} | job_title: {longest_desc_title}",
             sep="\n")
     except Exception as e:
-        print(e)
+        logging.error(f"Failed to profile: {db_path} | Reason: {e}")
 
 def fetch_from_database_query(cursor, query):
     cursor.execute(query)

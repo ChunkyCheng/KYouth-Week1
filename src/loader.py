@@ -1,11 +1,16 @@
 from pathlib import Path
 import sqlite3
 import json
+import logging
 
 def load_all_jsons(input_dir, output_dir):
     input_dir = Path(input_dir)
     output_dir = Path(output_dir)
     output_dir.mkdir(exist_ok=True, parents=True)
+
+    if not input_dir.is_dir():
+        logging.error(f"Failed to load: {input_dir}/ | Reason: {input_dir}/ not found")
+        return
 
     database = sqlite3.connect(output_dir / "jobs.db")
     cursor = database.cursor()
@@ -23,7 +28,7 @@ def load_all_jsons(input_dir, output_dir):
     total = 0
     success = 0
     fail = 0
-    print("🥇 Gold: ", output_dir, "/", sep="")
+    print("🥇 Gold:...")
     for f in input_dir.iterdir():
         if f.is_file() and f.suffix == ".json":
             total += 1
@@ -46,9 +51,9 @@ def load_json(file, cursor):
         """,
         (data["source_id"], data["job_title"], data["company"], data["description"])
         )
-        print("✅ Inserted:", file.name)
+        logging.info(f"✅ Inserted: {file.name}")
     except sqlite3.IntegrityError as e:
-        print("⏭️ Skipped (duplicate):", file.name)
+        logging.warning(f"⏭️ Skipped (duplicate): {file.name}")
         return False
 
     return True
