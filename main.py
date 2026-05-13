@@ -2,6 +2,7 @@ import sys
 from src.ingestor import ingest_all_mhtml
 from src.processor import process_all_html
 from src.loader import load_all_jsons
+from src.profiler import run_data_profile
 
 def ingest():
     ingest_all_mhtml("data/0_source", "data/1_bronze")
@@ -12,17 +13,31 @@ def process():
 def load():
     load_all_jsons("data/2_silver", "data/3_gold")
 
+def profile():
+    run_data_profile("data/3_gold/jobs.db")
+
+def all():
+    ingest()
+    print("\n")
+    process()
+    print("\n")
+    load()
+    print("\n")
+    profile()
+
 commands = {
     "ingest": ingest,
     "process": process,
-    "load": load
+    "load": load,
+    "profile": profile,
+    "all": all
 }
 
 def main():
     if len(sys.argv) == 2:
         commands.get(sys.argv[1], lambda: print("Unknown command"))()
     else:
-        print("Usage:", sys.argv[0], "<command>")
+        print("Usage: python", sys.argv[0], "[ingest|process|load|profile|all]")
 
 
 if __name__ == "__main__":
