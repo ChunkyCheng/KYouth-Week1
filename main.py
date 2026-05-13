@@ -1,6 +1,7 @@
 import sys
 from src.ingestor import ingest_all_mhtml
 from src.processor import process_all_html
+from src.loader import load_all_jsons
 
 def ingest():
     ingest_all_mhtml("data/0_source", "data/1_bronze")
@@ -8,9 +9,13 @@ def ingest():
 def process():
     process_all_html("data/1_bronze", "data/2_silver")
 
+def load():
+    load_all_jsons("data/2_silver", "data/3_gold")
+
 commands = {
     "ingest": ingest,
-    "process": process
+    "process": process,
+    "load": load
 }
 
 def main():
