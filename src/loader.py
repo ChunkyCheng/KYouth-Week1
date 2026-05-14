@@ -2,6 +2,7 @@ from pathlib import Path
 import sqlite3
 import json
 import logging
+import hashlib
 
 def load_all_jsons(input_dir, output_dir):
     input_dir = Path(input_dir)
@@ -21,7 +22,8 @@ def load_all_jsons(input_dir, output_dir):
     job_title TEXT,
     company TEXT,
     description TEXT,
-    tech_stack TEXT
+    tech_stack TEXT,
+    content_hash TEXT
     )
     """)
 
@@ -43,17 +45,37 @@ def load_all_jsons(input_dir, output_dir):
 
 def load_json(file, cursor):
     data = json.loads(file.read_text())
+    hash_input = f"{normalize(data['job_title'])}|{normalize(data['company'])}|{normalize(data['description'])}"
+    content_hash = hashlib.sha256(hash_input.encode()).hexdigest()
 
-    try:
+    cursor.execute("SELECT content_hash FROM jobs WHERE source_id = ?", (data["source_id"],))
+    row = cursor.fetchone()
+
+    if row == None:
         cursor.execute("""
-        INSERT INTO jobs (source_id, job_title, company, description)
-        VALUES (?,?,?,?)
+        INSERT INTO jobs (source_id, job_title, company, description, content_hash)
+        VALUES (?,?,?,?,?)
         """,
-        (data["source_id"], data["job_title"], data["company"], data["description"])
+        (data["source_id"], data["job_title"], data["company"], data["description"], content_hash)
         )
         logging.info(f"✅ Inserted: {file.name}")
-    except sqlite3.IntegrityError as e:
-        logging.warning(f"⏭️ Skipped (duplicate): {file.name}")
-        return False
+        return True
+    
+    if row[0] != content_hash:
+        cursor.execute("""
+        UPDATE jobs
+        SET job_title = ?, company = ?, description = ?, content_hash = ?
+        WHERE source_id = ?
+        """,
+        (data["job_title"], data["company"], data["description"], content_hash, data["source_id"])
+        )
+        logging.info(f"🔄 Updated: {file.name}")
+        return True
 
-    return True
+    logging.warning(f"⏭️ Skipped (duplicate): {file.name}")
+    return False
+
+def normalize(text):
+	if text is None:
+		return ""
+	return " ".join(text.lower().split())
