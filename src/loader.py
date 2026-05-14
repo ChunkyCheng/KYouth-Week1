@@ -51,7 +51,7 @@ def load_json(file, cursor):
     cursor.execute("SELECT content_hash FROM jobs WHERE source_id = ?", (data["source_id"],))
     row = cursor.fetchone()
 
-    if row == None:
+    if row is None:
         cursor.execute("""
         INSERT INTO jobs (source_id, job_title, company, description, content_hash)
         VALUES (?,?,?,?,?)

@@ -43,7 +43,7 @@ def run_data_profile(db_path):
         database.close()
 
         print(
-            f"--- 🔍 DATA QUALITY REPORT ---",
+            "--- 🔍 DATA QUALITY REPORT ---",
             f"📈 Total Records: {total}",
             f"❓ Missing Values -> job_title: {null_job_title}, company: {null_company}, description: {null_desc}",
             f"📝 Avg Description Length: {avg_desc} chars",
