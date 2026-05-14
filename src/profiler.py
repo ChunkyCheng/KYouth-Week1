@@ -14,6 +14,9 @@ def run_data_profile(db_path):
         cursor = database.cursor()
 
         total          = fetch_from_database_query(cursor, "SELECT COUNT(*) from jobs")
+        if total == 0:
+            logging.error(f"Failed to profile: {db_path} | Reason: database empty")
+            return
         null_job_title = fetch_from_database_query(cursor, "SELECT COUNT(*) from jobs WHERE job_title IS NULL")
         null_company   = fetch_from_database_query(cursor, "SELECT COUNT(*) from jobs WHERE company IS NULL")
         null_desc      = fetch_from_database_query(cursor, "SELECT COUNT(*) from jobs WHERE description IS NULL")
