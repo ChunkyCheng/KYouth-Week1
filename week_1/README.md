@@ -37,11 +37,6 @@ https://docs.astral.sh/uv/getting-started/installation/
 
 ## Setup
 
-Clone the repository:
-
-git clone <repo-url>  
-cd <repo-folder>  
-
 Run the project (uv handles dependencies automatically):
 
 uv run main.py  
@@ -107,12 +102,18 @@ The final SQLite database contains a `jobs` table:
 
 ---
 
-## Design Notes
+### Module 1: The Extractor (Medallion & Lakehouses)
+Why is it useful to keep the original raw HTML files instead of directly inserting processed data into the database? What problems become easier to debug or recover from?
+- **Answer**: Keeping the original means you always have something to fall back to. If any mistake was made that changed or lost information, the original will be there.
 
-- Each stage is separated for debugging and reproducibility  
-- Raw data is preserved to allow reprocessing  
-- HTML is fully cleaned before storage to ensure readability  
-- Designed for local-first execution (no external services required)  
+### Module 2: Treatment Plant (ETL vs ELT & Scale)
+Why do cloud systems prefer loading raw data first before cleaning it (ELT)? What problems happen when processing files sequentially, and how does distributed processing help?
+- **Answer**: Cloud systems are able to store data cheaply and can transform it only when needed. Processing files sequentially slows down the process as each step relies on the previous where one failure can stop the entire pipeline. Distributed processing allows for parallel tasks.
 
----
+### Module 3: The Blueprint & The Vault (Storage & Contracts)
+What should happen if an important field like job_title disappears? Why fail early instead of silently inserting nulls into DB? How does INSERT OR IGNORE help prevent duplicate records?
+- **Answer**: Silent nulls in important fields reduce the reliability, trust and quality of a database. It should be handled now rather than later. INSERT and IGNORE prevents duplicates and missing primary keys.
 
+### Module 4: The QA Inspector & Orchestrator (Orchestration & DAGs)
+What happens if processor.py crashes halfway? How are automated orchestration tools more reliable than manual retries with Python scripts?
+- **Answer**: If processor.py crashes halfway, you can end up with partial or inconsistent outputs that are hard to track manually. Automated orchestration tools solve this by managing dependencies, retries, and checkpoints so tasks resume safely. They are more reliable than manual scripts because they enforce execution order and can recover from failures without human intervention.
