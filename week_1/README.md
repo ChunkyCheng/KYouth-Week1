@@ -37,7 +37,10 @@ https://docs.astral.sh/uv/getting-started/installation/
 
 ## Setup
 
-Run the project (uv handles dependencies automatically):
+Sync the project:
+uv sync
+
+Run the project:
 
 uv run main.py  
 
