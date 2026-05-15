@@ -45,6 +45,7 @@ uv run main.py
 
 ## Usage
 
+Make sure files to be processed are in a data/ directory
 All commands are executed through main.py:
 
 Show available commands:
